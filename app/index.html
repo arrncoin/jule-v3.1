@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kak Jule Live Stream Overlay & Bot</title>
+  <meta name="description" content="Interactive live stream bot and overlay system with game leaderboards, live voting, AI storytelling, and multi-platform live chat integration.">
+  <meta property="og:title" content="Kak Jule Live Stream Overlay & Bot">
+  <meta property="og:description" content="Interactive live stream bot and overlay system with game leaderboards, live voting, AI storytelling, and multi-platform live chat integration.">
+  <link rel="icon" type="image/png" href="/assets/icon.png">
+  <link rel="stylesheet" href="/app/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="desktop-app" class="app-root">
+
+    <!-- Top App Navigation & Master Control Bar -->
+    <header id="top-navbar" class="top-nav">
+      <div class="nav-left">
+        <div class="brand-badge">
+          <img src="/assets/icon.png" alt="Logo" class="brand-icon" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <div class="brand-title">KAK JULE STUDIO</div>
+            <div class="brand-subtitle">Broadcast Assistant V3.1</div>
+          </div>
+        </div>
+
+        <div id="bot-status-badge" class="status-pill status-standby">
+          <span class="status-indicator"></span>
+          <span id="bot-status-text" class="status-label">STANDBY</span>
+        </div>
+
+        <div id="uptime-pill" class="uptime-pill" title="Durasi Sesi Bot Berjalan">
+          <span class="uptime-icon">⏱️</span>
+          <span id="uptime-display">00:00:00</span>
+        </div>
+      </div>
+
+      <!-- Master Start / Stop Controls -->
+      <div class="nav-center">
+        <div class="master-controls" id="master-bot-controls">
+          <button id="btn-start-bot" class="btn-ctrl btn-start" onclick="AppController.startBot()">
+            <svg class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span>Start Bot</span>
+          </button>
+          <button id="btn-stop-bot" class="btn-ctrl btn-stop" onclick="AppController.stopBot()" disabled>
+            <svg class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <span>Stop Bot</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div id="license-chip" class="license-chip unactivated" onclick="AppController.toggleLicenseModal()">
+          <span class="license-icon">🔑</span>
+          <span id="license-chip-text">Belum Teraktivasi</span>
+        </div>
+
+        <div class="clock-display" id="desktop-clock">--:--:--</div>
+
+        <button id="btn-open-settings" class="nav-icon-btn" onclick="AppController.toggleSettingsModal()" title="Pengaturan Bot & API">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- License Activation Alert Banner (Visible when unactivated) -->
+    <div id="license-banner" class="license-banner hidden">
+      <div class="banner-content">
+        <div class="banner-icon">🔒</div>
+        <div class="banner-info">
+          <div class="banner-title">Aplikasi Belum Teraktivasi (Langganan Diperlukan)</div>
+          <div class="banner-desc">
+            Masukkan serial kode lisensi langganan Kak Jule Anda untuk mengaktifkan bot dan menghubungkan ke live stream.
+          </div>
+        </div>
+      </div>
+      <div class="banner-action">
+        <button id="btn-banner-activate" class="btn-accent-glow" onclick="AppController.toggleLicenseModal()">
+          🔑 Masukkan Lisensi
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Studio Workspace Grid -->
+    <main class="studio-layout">
+
+      <!-- LEFT COLUMN: Live Platforms, Activity Feed & Stream Console -->
+      <section class="studio-col left-col">
+
+        <!-- Platforms Status Card -->
+        <div class="studio-card" id="card-platforms">
+          <div class="card-header">
+            <div class="card-header-left">
+              <span class="card-title-icon">📡</span>
+              <h2 class="card-title">Koneksi Platform Live</h2>
+            </div>
+            <button class="btn-mini-refresh" onclick="AppController.fetchStatus()" title="Refresh Status">🔄</button>
+          </div>
+          <div class="card-body">
+            <div class="platforms-grid">
+              
+              <!-- YouTube Live Status -->
+              <div class="platform-item" id="platform-yt">
+                <div class="platform-icon-wrap yt-badge">
+                  <svg class="p-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+                <div class="platform-details">
+                  <div class="platform-name-row">
+                    <span class="platform-name">YouTube Live</span>
+                    <span id="yt-status-badge" class="platform-state state-offline">Offline</span>
+                  </div>
+                  <div class="platform-meta">
+                    <span class="meta-label">Sumber Live:</span>
+                    <span id="yt-channel-text" class="meta-val">Belum Dikonfigurasi</span>
+                  </div>
+                  <div class="platform-meta">
+                    <span class="meta-label">Pengelola:</span>
+                    <span id="yt-owner-text" class="meta-val">Belum Dikonfigurasi</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TikTok Live Status -->
+              <div class="platform-item" id="platform-tiktok">
+                <div class="platform-icon-wrap tt-badge">
+                  <svg class="p-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                </div>
+                <div class="platform-details">
+                  <div class="platform-name-row">
+                    <span class="platform-name">TikTok Live</span>
+                    <span id="tt-status-badge" class="platform-state state-offline">Offline</span>
+                  </div>
+                  <div class="platform-meta">
+                    <span class="meta-label">Akun:</span>
+                    <span id="tt-user-text" class="meta-val">Belum Dikonfigurasi</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Console: Dual Menus (Aktivitas Obrolan & Respon AI vs Log Sistem) -->
+        <div class="studio-card flex-grow-card" id="card-console">
+          <div class="card-header console-tab-header">
+            <div class="console-nav-tabs">
+              <button type="button" class="console-nav-btn active" id="tab-btn-chat" onclick="AppController.switchConsoleTab('chat')">
+                <span class="tab-icon">💬</span>
+                <span class="tab-label">Obrolan & Respon Kak Jule</span>
+                <span id="chat-count-badge" class="count-badge">0</span>
+              </button>
+              <button type="button" class="console-nav-btn" id="tab-btn-system" onclick="AppController.switchConsoleTab('system')">
+                <span class="tab-icon">🖥️</span>
+                <span class="tab-label">Log Aktivitas Sistem</span>
+                <span id="system-count-badge" class="count-badge">0</span>
+              </button>
+            </div>
+            <div class="card-header-actions">
+              <!-- Subfilters untuk Obrolan & AI -->
+              <div class="filter-group" id="chat-subfilters">
+                <button type="button" class="filter-btn active" data-filter="chat-all" onclick="AppController.setLogFilter('chat-all')">Semua</button>
+                <button type="button" class="filter-btn" data-filter="chat-user" onclick="AppController.setLogFilter('chat-user')">Chat Penonton</button>
+                <button type="button" class="filter-btn" data-filter="chat-bot" onclick="AppController.setLogFilter('chat-bot')">Respon Kak Jule</button>
+              </div>
+              <!-- Subfilters untuk Log Sistem -->
+              <div class="filter-group hidden" id="system-subfilters">
+                <button type="button" class="filter-btn active" data-filter="sys-all" onclick="AppController.setLogFilter('sys-all')">Semua Log</button>
+                <button type="button" class="filter-btn" data-filter="sys-info" onclick="AppController.setLogFilter('sys-info')">Info</button>
+                <button type="button" class="filter-btn" data-filter="sys-warn" onclick="AppController.setLogFilter('sys-warn')">Peringatan</button>
+                <button type="button" class="filter-btn" data-filter="sys-error" onclick="AppController.setLogFilter('sys-error')">Error</button>
+              </div>
+              <button type="button" class="btn-clear-log" onclick="AppController.clearLogs()" title="Bersihkan log saat ini">🗑️</button>
+            </div>
+          </div>
+          
+          <div class="terminal-body" id="terminal-feed">
+            <div class="terminal-placeholder" id="terminal-empty">
+              <div class="placeholder-icon">📡</div>
+              <p>Menunggu aktivitas live chat & respon AI...</p>
+              <span class="placeholder-tip">Pesan dari YouTube / TikTok dan respon suara Kak Jule akan muncul di sini secara real-time.</span>
+            </div>
+          </div>
+
+          <!-- Quick Test Chat Simulator (Khusus Menu Obrolan) -->
+          <div class="terminal-footer" id="chat-simulator-footer">
+            <form id="chat-simulator-form" onsubmit="AppController.simulateChat(event)">
+              <div class="sim-input-wrap">
+                <input type="text" id="sim-author" class="sim-name-input" placeholder="Nama..." value="Streamer" maxlength="20">
+                <input type="text" id="sim-message" class="sim-text-input" placeholder="Ketik pesan uji coba untuk Kak Jule (misal: halo kak jule)..." required>
+                <button type="submit" id="btn-send-sim" class="btn-sim-send">
+                  <span>Kirim Test</span>
+                  <svg class="send-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: OBS Overlay Hub, Live Preview & Audio Testing -->
+      <section class="studio-col right-col">
+
+        <!-- OBS Overlay Hub & Live Preview -->
+        <div class="studio-card" id="card-obs-hub">
+          <div class="card-header">
+            <div class="card-header-left">
+              <span class="card-title-icon">📺</span>
+              <h2 class="card-title">OBS Studio Overlay Hub</h2>
+            </div>
+            <div class="badge-obs">OBS BROWSER SOURCE</div>
+          </div>
+          <div class="card-body">
+            
+            <div class="obs-url-box">
+              <div class="obs-url-label">URL Browser Source (Pasang di OBS):</div>
+              <div class="obs-url-row">
+                <input type="text" id="obs-source-url" class="obs-url-input" value="http://localhost:3000/overlay/index.html" readonly>
+                <button id="btn-copy-obs" class="btn-copy-action" onclick="AppController.copyObsUrl()">
+                  <span id="copy-btn-text">📋 Salin URL</span>
+                </button>
+              </div>
+              <div class="obs-specs">
+                <span class="spec-tag">📐 1920 × 1080</span>
+                <span class="spec-tag">✨ Transparan</span>
+                <span class="spec-tag">⚡ 60 FPS</span>
+              </div>
+            </div>
+
+            <!-- OBS Sub & Realtime Viewer URL -->
+            <div class="obs-url-box" style="margin-top: 10px;">
+              <div class="obs-url-label">URL Overlay Penonton Live & Sub (sub.html):</div>
+              <div class="obs-url-row">
+                <input type="text" id="obs-sub-url" class="obs-url-input" value="http://localhost:3000/overlay/sub.html" readonly>
+                <button id="btn-copy-sub" class="btn-copy-action" onclick="AppController.copySubUrl()">
+                  <span id="copy-sub-text">📋 Salin URL</span>
+                </button>
+                <a href="/overlay/sub.html" target="_blank" class="btn-copy-action" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
+                  <span>🔗 Buka</span>
+                </a>
+              </div>
+              <div class="obs-specs">
+                <span class="spec-tag">🔴 YT & TT Live Viewers</span>
+                <span class="spec-tag">🎯 Realtime Milestone</span>
+                <span class="spec-tag">✨ Transparan</span>
+              </div>
+            </div>
+
+            <!-- Interactive Live OBS Preview -->
+            <div class="obs-preview-section">
+              <div class="preview-header">
+                <div class="preview-title">
+                  <span class="rec-dot"></span>
+                  <span>Pratinjau Layar OBS</span>
+                  <div class="preview-tabs">
+                    <button id="tab-obs-index" class="preview-tab-btn active" onclick="AppController.switchPreviewTab('index')">HUD Game</button>
+                    <button id="tab-obs-sub" class="preview-tab-btn" onclick="AppController.switchPreviewTab('sub')">Penonton Live</button>
+                  </div>
+                </div>
+                <button class="btn-preview-refresh" onclick="AppController.reloadOverlayPreview()" title="Reload Preview">🔄</button>
+              </div>
+              <div class="preview-frame-wrap">
+                <iframe id="obs-preview-iframe" src="/overlay/index.html" title="OBS Live Overlay Preview"></iframe>
+                <div class="preview-grid-overlay"></div>
+              </div>
+            </div>
+
+            <!-- Mode Triggers (Instantly change what OBS displays) -->
+            <div class="overlay-mode-triggers">
+              <div class="triggers-label">Uji Tampilan Layar OBS:</div>
+              <div class="trigger-buttons-grid">
+                <button class="btn-trigger" onclick="AppController.setOverlayMode('dashboard', 'idle')" title="Mascot Avatar di sudut layar">
+                  <span>👤 Avatar Idle</span>
+                </button>
+                <button class="btn-trigger" onclick="AppController.setOverlayMode('game', 'question')" title="Tampilkan Kuis Soal di OBS">
+                  <span>🎲 Kuis Soal</span>
+                </button>
+                <button class="btn-trigger" onclick="AppController.setOverlayMode('voting', 'active')" title="Tampilkan Bar Polling">
+                  <span>📊 Live Voting</span>
+                </button>
+                <button class="btn-trigger" onclick="AppController.setOverlayMode('story', 'reading')" title="Tampilkan Mode Cerita">
+                  <span>📖 Cerita AI</span>
+                </button>
+                <button class="btn-trigger" onclick="AppController.setOverlayMode('leaderboard', 'show')" title="Tampilkan Peringkat">
+                  <span>🏆 Leaderboard</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Audio & Voice Testing Card -->
+        <div class="studio-card" id="card-audio-tools">
+          <div class="card-header">
+            <div class="card-header-left">
+              <span class="card-title-icon">🔊</span>
+              <h2 class="card-title">Uji Suara & TTS Kak Jule</h2>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="tts-test-row">
+              <input type="text" id="tts-sample-text" class="tts-input" placeholder="Teks uji coba suara..." value="Halo semuanya! Selamat datang di live stream, Kak Jule siap nemenin kalian!">
+              <button id="btn-test-tts" class="btn-test-audio" onclick="AppController.testTTS()">
+                <span>🔊 Tes Suara</span>
+              </button>
+            </div>
+            <div class="tts-hint">
+              Pastikan output audio default Windows Anda tersambung ke headphone atau Virtual Audio Cable OBS.
+            </div>
+          </div>
+        </div>
+
+        <!-- Interaction Points & Leaderboard Hub -->
+        <div class="studio-card" id="card-points-hub">
+          <div class="card-header">
+            <div class="card-header-left">
+              <span class="card-title-icon">🏆</span>
+              <h2 class="card-title">Poin & Leaderboard Penonton</h2>
+            </div>
+            <div class="card-header-actions">
+              <span id="lb-sync-badge" class="count-badge" style="color:#34d399;">● Real-time</span>
+              <button class="btn-mini-refresh" onclick="AppController.fetchLeaderboard()" title="Muat Ulang Leaderboard">🔄</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Mini Leaderboard Table -->
+            <div class="points-hub-table-wrap">
+              <table class="points-hub-table">
+                <thead>
+                  <tr>
+                    <th style="width: 38px;">Pos</th>
+                    <th>Penonton</th>
+                    <th style="width: 50px;">Level</th>
+                    <th style="text-align: right; width: 75px;">Poin</th>
+                  </tr>
+                </thead>
+                <tbody id="hub-leaderboard-body">
+                  <tr>
+                    <td colspan="4" class="hub-table-empty">Memuat data klasemen poin...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Viewer Points Lookup & Quick Bonus Reward -->
+            <div class="points-tools-row">
+              <form class="points-search-form" onsubmit="AppController.lookupViewerPoints(event)">
+                <input type="text" id="input-lookup-viewer" class="points-search-input" placeholder="Cari nama viewer..." autocomplete="off">
+                <button type="submit" class="btn-points-search" title="Cari Poin Viewer">🔍 Cari</button>
+              </form>
+            </div>
+
+            <!-- Lookup Result Box -->
+            <div id="viewer-lookup-result" class="viewer-lookup-box hidden">
+              <div class="viewer-lookup-info">
+                <span id="lookup-platform-tag" class="platform-tag platform-youtube">YT</span>
+                <span id="lookup-name" class="lookup-username">Viewer</span>
+                <span id="lookup-rank" class="lookup-rank-badge">#1</span>
+                <span id="lookup-level" class="lookup-level-badge">Lv.1</span>
+                <span id="lookup-points" class="lookup-points-val">0 Poin</span>
+              </div>
+              <div class="viewer-bonus-actions">
+                <span class="bonus-label">Beri Bonus:</span>
+                <button type="button" class="btn-bonus-chip" onclick="AppController.grantBonusPoints(5)">+5</button>
+                <button type="button" class="btn-bonus-chip" onclick="AppController.grantBonusPoints(20)">+20</button>
+                <button type="button" class="btn-bonus-chip" onclick="AppController.grantBonusPoints(50)">+50</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Modal 1: License Activation (Mandatory to unlock bot) -->
+    <div id="license-modal" class="app-modal hidden" onclick="AppController.handleModalBackdrop(event, 'license-modal')">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">🔑</span>
+            <div>
+              <h3 class="modal-title">Aktivasi Lisensi Kak Jule</h3>
+              <p class="modal-subtitle">Masukkan kode serial langganan Anda</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" onclick="AppController.toggleLicenseModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="license-active-info" class="license-status-card hidden">
+            <div class="active-badge">✓ LISENSI AKTIF</div>
+            <div class="info-row">
+              <span class="info-lbl">Paket:</span>
+              <span id="lic-tier-val" class="info-val">LIFETIME VIP</span>
+            </div>
+            <div class="info-row">
+              <span class="info-lbl">Sisa Hari:</span>
+              <span id="lic-days-val" class="info-val">365 Hari</span>
+            </div>
+            <div class="info-row">
+              <span class="info-lbl">Kedaluwarsa:</span>
+              <span id="lic-exp-val" class="info-val">--</span>
+            </div>
+          </div>
+
+          <form id="license-form" onsubmit="AppController.submitLicense(event)">
+            <div class="form-group">
+              <label for="input-license-key" class="form-label">Kode Serial Lisensi *</label>
+              <input type="text" id="input-license-key" class="form-input font-mono" placeholder="JULE-XXXX-XXXX-XXXX-XXXX-XXXX" required autocomplete="off">
+              <div class="form-hint">Format serial: JULE-XXXX-... (dihasilkan oleh pembuat lisensi).</div>
+            </div>
+            <div class="form-group">
+              <label for="input-streamer-name" class="form-label">Nama Streamer (Opsional)</label>
+              <input type="text" id="input-streamer-name" class="form-input" placeholder="Nama Anda / Channel Anda">
+            </div>
+            <div id="license-msg-box" class="msg-box hidden"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn-cancel" onclick="AppController.toggleLicenseModal()">Batal</button>
+              <button type="submit" id="btn-submit-license" class="btn-primary">
+                <span>Aktifkan Sekarang</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2: Bot & API Settings -->
+    <div id="settings-modal" class="app-modal hidden" onclick="AppController.handleModalBackdrop(event, 'settings-modal')">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">⚙️</span>
+            <div>
+              <h3 class="modal-title">Pengaturan Kak Jule</h3>
+              <p class="modal-subtitle">Kelola API Key, Channel & Konfigurasi AI</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" onclick="AppController.toggleSettingsModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="settings-form" onsubmit="AppController.submitSettings(event)">
+            <div class="form-group">
+              <label for="set-gemini-key" class="form-label">Gemini API Key</label>
+              <div class="password-input-wrap">
+                <input type="password" id="set-gemini-key" class="form-input font-mono" placeholder="AIzaSy...">
+                <button type="button" class="btn-toggle-eye" onclick="AppController.toggleKeyVisibility('set-gemini-key')">👁️</button>
+              </div>
+              <div class="form-hint">Diperlukan untuk respon cerdas, pembacaan kuis, dan interaksi AI.</div>
+            </div>
+
+            <!-- YouTube Live Stream vs Owner Configuration -->
+            <div class="settings-section-divider">
+              <span>Konfigurasi YouTube (Live Chat & Pengelola)</span>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="set-yt-live-channel" class="form-label">
+                  <span>Sumber Livestream (YT_CHANNEL_LIVE_ID)</span>
+                </label>
+                <input type="text" id="set-yt-live-channel" class="form-input font-mono" placeholder="UCxxxx / @handle / Link Live / Video ID">
+                <div class="form-hint">Mendukung ID Channel (UC...), Handle (@nama), atau langsung Link/ID Video Livestream YouTube aktif (contoh: https://youtube.com/live/xxx atau Video ID 11 karakter).</div>
+              </div>
+              <div class="form-group">
+                <div class="label-with-action">
+                  <label for="set-yt-owner-channel" class="form-label">
+                    <span>Pengelola Chat Router (YT_CHANNEL_LIVE_OWNER)</span>
+                  </label>
+                  <button type="button" class="btn-text-action" onclick="AppController.syncOwnerWithLive()">Samakan</button>
+                </div>
+                <input type="text" id="set-yt-owner-channel" class="form-input font-mono" placeholder="UCxxxx (Channel Pemilik/Admin)">
+                <div class="form-hint">ID Channel pemilik untuk otoritas command bot (!jule on/off, kuis, poin dll).</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="set-yt-api-key" class="form-label">YouTube Data API Key (Opsional)</label>
+              <div class="password-input-wrap">
+                <input type="password" id="set-yt-api-key" class="form-input font-mono" placeholder="AIzaSy... (Opsional)">
+                <button type="button" class="btn-toggle-eye" onclick="AppController.toggleKeyVisibility('set-yt-api-key')">👁️</button>
+              </div>
+              <div class="form-hint">Opsional. Sistem otomatis mendeteksi status live, penonton, dan subscriber secara akurat.</div>
+            </div>
+
+            <!-- TikTok Streamer Configuration -->
+            <div class="settings-section-divider">
+              <span>Konfigurasi TikTok Live</span>
+            </div>
+
+            <div class="form-group">
+              <label for="set-tiktok-user" class="form-label">TikTok Username</label>
+              <input type="text" id="set-tiktok-user" class="form-input font-mono" placeholder="@username">
+              <div class="form-hint">Username akun TikTok streamer yang sedang live.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="set-tiktools-key" class="form-label">TikTools API Key (Khusus TikTok Live)</label>
+              <div class="password-input-wrap">
+                <input type="password" id="set-tiktools-key" class="form-input font-mono" placeholder="tiktools_...">
+                <button type="button" class="btn-toggle-eye" onclick="AppController.toggleKeyVisibility('set-tiktools-key')">👁️</button>
+              </div>
+              <div class="form-hint">Diperlukan bila menghubungkan TikTok Live via @tiktool/live.</div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="set-model" class="form-label">Model Gemini AI</label>
+                <select id="set-model" class="form-input">
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash (Direkomendasikan)</option>
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+                  <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                  <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="set-voice-speed" class="form-label">Kecepatan Suara</label>
+                <select id="set-voice-speed" class="form-input">
+                  <option value="normal">Normal (1.0x)</option>
+                  <option value="fast">Cepat (1.2x)</option>
+                  <option value="slow">Santai (0.8x)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="settings-msg-box" class="msg-box hidden"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn-cancel" onclick="AppController.toggleSettingsModal()">Tutup</button>
+              <button type="submit" id="btn-save-settings" class="btn-primary">
+                <span>Simpan Konfigurasi</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast Notification -->
+    <div id="app-toast" class="app-toast"></div>
+
+  </div>
+
+  <script src="/app/app.js"></script>
+</body>
+</html>

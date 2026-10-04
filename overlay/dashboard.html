@@ -1,0 +1,31 @@
+<!-- overlay/dashboard.html -->
+<!-- Clean On-Stream Mascot & Companion HUD for OBS Studio Browser Source -->
+<div id="obs-stream-hud" class="obs-hud-container">
+  <div class="hud-companion-card">
+    
+    <!-- Animated Mascot Avatar -->
+    <div class="companion-avatar-wrap">
+      <div class="avatar-glow-ring"></div>
+      <img src="/assets/icon.png" alt="Kak Jule" class="companion-avatar-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><circle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%238b5cf6\'/><text x=\'50\' y=\'62\' font-size=\'40\' text-anchor=\'middle\' fill=\'white\'>✨</text></svg>'">
+      <div class="companion-status-dot"></div>
+    </div>
+
+    <!-- Floating Speech Caption Bubble -->
+    <div class="companion-speech-bubble" id="companion-bubble">
+      <div class="bubble-header">
+        <span class="companion-name">KAK JULE</span>
+        <span id="mode" class="mode-tag">STANDBY</span>
+        <div class="soundwave-viz">
+          <span class="eq-bar bar-1"></span>
+          <span class="eq-bar bar-2"></span>
+          <span class="eq-bar bar-3"></span>
+          <span class="eq-bar bar-4"></span>
+        </div>
+      </div>
+      <div class="bubble-text" id="status-text">
+        Halo penonton! Kak Jule siap nemenin live stream kalian ✨
+      </div>
+    </div>
+
+  </div>
+</div>

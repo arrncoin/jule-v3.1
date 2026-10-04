@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=800, height=1000, initial-scale=1.0, user-scalable=no">
+    <title>SIAPA — OBS Survival Arena Overlay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Rajdhani:wght@500;600;700;800&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.0">
+</head>
+<body>
+    <div id="arena-container" class="arena-root">
+        <!-- Canvas Background FX (Particles, Shockwaves, Confetti) -->
+        <canvas id="fx-canvas" width="800" height="1000"></canvas>
+
+        <!-- Red Flash Strobe on Elimination -->
+        <div id="elimination-strobe" class="strobe-layer hidden"></div>
+
+        <!-- Ambient Glow Backdrops -->
+        <div class="ambient-glow cyan-glow"></div>
+        <div class="ambient-glow purple-glow"></div>
+        <div id="danger-glow" class="ambient-glow red-glow hidden"></div>
+
+        <!-- ARENA FRAME (800x1000) -->
+        <div class="arena-frame">
+            <!-- HEADER TOP: ARENA BRAND & ROUND PROGRESS -->
+            <header class="arena-header">
+                <div class="brand-bar">
+                    <div class="brand-icon">⚡</div>
+                    <div class="brand-text">
+                        <span class="brand-main">SIAPA</span>
+                        <span class="brand-sub">SURVIVAL ARENA</span>
+                    </div>
+                    <div id="arena-badge" class="arena-badge badge-standby">STANDBY</div>
+                </div>
+
+                <!-- Round Progress Indicator -->
+                <div class="round-tracker" id="round-tracker">
+                    <div class="round-label-row">
+                        <span id="round-label-text" class="round-label">ROUND 01 / 06</span>
+                        <span id="alive-badge-header" class="alive-count-badge">👥 <b id="header-alive-val">0</b> ALIVE</span>
+                    </div>
+                    <div class="round-dots" id="round-dots">
+                        <!-- Dynamic round dots: ● ● ● ○ ○ -->
+                    </div>
+                </div>
+            </header>
+
+            <!-- ========================================================= -->
+            <!-- 1. VIEW IDLE / STANDBY -->
+            <!-- ========================================================= -->
+            <section id="view-idle" class="view-panel active">
+                <div class="idle-card glass-panel">
+                    <div class="idle-glitch-title" data-text="SIAPA BERTAHAN?">SIAPA BERTAHAN?</div>
+                    <p class="idle-subtitle">LIVECHAT SURVIVAL BATTLE ROYALE SHOW</p>
+                    
+                    <div class="cta-box">
+                        <div class="cta-pulse-ring"></div>
+                        <span class="cta-command">!siapa</span>
+                        <span class="cta-sub">KETIK DI CHAT UNTUK MEMULAI ARENA</span>
+                    </div>
+
+                    <!-- Mini Leaderboard Preview -->
+                    <div class="leaderboard-preview-box">
+                        <div class="box-title">🏆 TOP SURVIVORS LEADERBOARD</div>
+                        <div id="idle-leaderboard-list" class="mini-leaderboard-list">
+                            <div class="leader-row placeholder">Memuat klasemen...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- 2. VIEW LOBBY (Pendaftaran Peserta) -->
+            <!-- ========================================================= -->
+            <section id="view-lobby" class="view-panel hidden">
+                <div class="lobby-card glass-panel">
+                    <div class="lobby-status-tag">REGISTRATION OPEN</div>
+                    <h1 class="lobby-hero-title">SIAPA YANG AKAN BERTAHAN?</h1>
+                    
+                    <div class="join-cta-banner">
+                        <div class="cta-cmd-badge">!join</div>
+                        <div class="cta-info">
+                            <div class="info-bold">JOIN SEKARANG JUGA!</div>
+                            <div class="info-desc">Ketik <b>!join</b> di livechat untuk masuk arena!</div>
+                        </div>
+                    </div>
+
+                    <!-- Giant Countdown Timer -->
+                    <div class="countdown-radial-wrapper">
+                        <svg class="radial-svg" viewBox="0 0 200 200">
+                            <circle class="radial-bg" cx="100" cy="100" r="88"></circle>
+                            <circle id="radial-progress-bar" class="radial-fg" cx="100" cy="100" r="88"></circle>
+                        </svg>
+                        <div class="radial-center-text">
+                            <span id="lobby-countdown-number" class="radial-seconds">20</span>
+                            <span class="radial-unit">DETIK</span>
+                        </div>
+                    </div>
+
+                    <!-- Capacity & Progress Bar -->
+                    <div class="player-capacity-box">
+                        <div class="cap-labels">
+                            <span class="cap-title">PLAYERS REGISTERED</span>
+                            <span id="lobby-players-count" class="cap-numbers">0 / 1000</span>
+                        </div>
+                        <div class="progress-track">
+                            <div id="lobby-progress-fill" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Live Ticker of Recent Joined Players -->
+                    <div class="recent-joined-container">
+                        <div class="recent-header">BARU BERGABUNG:</div>
+                        <div id="recent-joined-list" class="joined-tags-list">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- 3. VIEW ACTIVE ROUND (Gameplay & Challenge) -->
+            <!-- ========================================================= -->
+            <section id="view-round" class="view-panel hidden">
+                <div class="round-card glass-panel">
+                    
+                    <!-- Survivors Progress Meter -->
+                    <div class="survivor-meter">
+                        <div class="meter-head">
+                            <span class="meter-title">SURVIVORS</span>
+                            <span id="round-alive-ratio" class="meter-ratio">347 / 500 (69%)</span>
+                        </div>
+                        <div class="progress-track heavy-track">
+                            <div id="round-alive-fill" class="progress-fill survivor-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Challenge Title & Prompt -->
+                    <div class="challenge-box">
+                        <div id="challenge-badge" class="challenge-type-badge">PILIH SISI</div>
+                        <h2 id="challenge-title" class="challenge-headline">ZONA KIRI ATAU KANAN</h2>
+                        <p id="challenge-desc" class="challenge-description">Ketik !kiri atau !kanan di chat! Zona bahaya akan tereliminasi!</p>
+                        
+                        <div class="challenge-action-card">
+                            <div class="action-pulse-icon">⚡</div>
+                            <div id="challenge-prompt" class="action-prompt-text">PILIH: !kiri ATAU !kanan</div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Countdown Bar -->
+                    <div class="round-timer-box">
+                        <div class="timer-label-row">
+                            <span>SISA WAKTU TANTANGAN</span>
+                            <span id="challenge-timer-val" class="timer-seconds">10s</span>
+                        </div>
+                        <div class="timer-bar-track">
+                            <div id="challenge-timer-fill" class="timer-bar-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Ticker in Arena -->
+                    <div class="arena-ticker-box">
+                        <div class="ticker-label">ARENA ACTIVITY:</div>
+                        <div id="round-activity-feed" class="activity-feed">
+                            <div class="feed-item pulse">Zona tempur aktif. Memindai input pemain...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- 4. VIEW ELIMINATING (Transisi Eliminasi Dramatis) -->
+            <!-- ========================================================= -->
+            <section id="view-eliminating" class="view-panel hidden">
+                <div class="eliminating-card glass-panel danger-border">
+                    <div class="skull-hazard-icon">💀</div>
+                    <h2 class="danger-title">ELIMINATION PROTOCOL</h2>
+                    <div id="eliminating-result-detail" class="elim-result-banner">
+                        MEMINDAI HASIL TANTANGAN...
+                    </div>
+
+                    <div class="elimination-stat-row">
+                        <div class="stat-box red-box">
+                            <span class="stat-label">TERELIMINASI</span>
+                            <span id="elim-count-val" class="stat-value">153</span>
+                        </div>
+                        <div class="stat-box green-box">
+                            <span class="stat-label">BERTAHAN</span>
+                            <span id="survivor-count-val" class="stat-value">347</span>
+                        </div>
+                    </div>
+
+                    <!-- List of Victims with Rankings -->
+                    <div class="victims-container">
+                        <div class="victims-title">PEMAIN GUGUR:</div>
+                        <div id="victims-list" class="victims-list">
+                            <!-- Injected: @user Rank #347 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- 5. VIEW FINAL (Final 10 & Final Duel 1 vs 1) -->
+            <!-- ========================================================= -->
+            <section id="view-final" class="view-panel hidden">
+                <div class="final-card glass-panel final-border">
+                    <div id="final-mode-badge" class="final-badge">🔥 FINAL 10 🔥</div>
+                    
+                    <div id="final-duel-box" class="final-duel-arena hidden">
+                        <div class="duel-player p1-box">
+                            <div class="fighter-tag">FIGHTER 1</div>
+                            <div id="duel-p1-name" class="fighter-name">PLAYER A</div>
+                            <div id="duel-p1-points" class="fighter-pts">+350 PTS</div>
+                        </div>
+
+                        <div class="vs-divider">
+                            <div class="vs-text">VS</div>
+                            <div class="vs-lightning">⚡</div>
+                        </div>
+
+                        <div class="duel-player p2-box">
+                            <div class="fighter-tag">FIGHTER 2</div>
+                            <div id="duel-p2-name" class="fighter-name">PLAYER B</div>
+                            <div id="duel-p2-points" class="fighter-pts">+350 PTS</div>
+                        </div>
+                    </div>
+
+                    <div id="final-general-box" class="final-general-arena">
+                        <h2 class="final-subhead">ARENA PUNCAK MEMANAS!</h2>
+                        <p class="final-desc">Hanya pemain terhebat yang mampu bertahan hingga detik terakhir!</p>
+                        <div class="final-counter-badge">
+                            TERSISA <span id="final-alive-num">10</span> PEMAIN
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- 6. VIEW WINNER (Celebration of Sole Survivor) -->
+            <!-- ========================================================= -->
+            <section id="view-winner" class="view-panel hidden">
+                <div class="winner-card glass-panel gold-border">
+                    <div class="winner-trophy-anim">🏆</div>
+                    <div class="winner-badge">SOLE SURVIVOR</div>
+                    <h1 class="winner-hero-text">WINNER!</h1>
+                    
+                    <div class="winner-player-banner">
+                        <div id="winner-username" class="winner-name">@PLAYER</div>
+                        <div class="winner-reward-tag">+1000 POINTS</div>
+                    </div>
+
+                    <div class="winner-stats-grid">
+                        <div class="stat-pill">
+                            <span class="pill-label">TOTAL POINTS</span>
+                            <span id="winner-stat-points" class="pill-value">1,450</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="pill-label">WINS</span>
+                            <span id="winner-stat-wins" class="pill-value">1</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="pill-label">BEST RANK</span>
+                            <span id="winner-stat-rank" class="pill-value">#1</span>
+                        </div>
+                    </div>
+
+                    <div class="replay-prompt-box">
+                        <span class="replay-icon">🔄</span>
+                        <span class="replay-text">TYPE <b>!siapa</b> TO PLAY AGAIN</span>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /arena-frame -->
+    </div><!-- /arena-root -->
+
+    <script src="app.js?v=2.0"></script>
+</body>
+</html>

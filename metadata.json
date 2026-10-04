@@ -1,0 +1,8 @@
+{
+  "name": "Kak Jule Live Stream Overlay & Bot",
+  "description": "Interactive live stream bot and overlay system with game leaderboards, live voting, AI storytelling, and multi-platform live chat integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

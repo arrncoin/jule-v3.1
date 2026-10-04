@@ -1,0 +1,43 @@
+<div id="overlay-container">
+    <!-- Floating Point Notification Banner (OBS Toast) -->
+    <div id="point-toast" class="toast hidden" aria-live="polite">
+        <div class="toast-glow"></div>
+        <div class="toast-icon" id="toast-icon">🎉</div>
+        <div class="toast-content">
+            <div class="toast-title" id="toast-title">RIKO +5 Poin!</div>
+            <div class="toast-sub" id="toast-sub">Juara 1 Tebak Kata • Total: 12.450</div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Card -->
+    <div class="leaderboard-card">
+        <header class="leaderboard-header">
+            <div class="header-badge">
+                <span class="pulse-dot"></span>
+                <span class="badge-text" id="lb-badge">LIVE</span>
+            </div>
+            <h1 class="header-title">
+                <span class="trophy">🏆</span> <span id="lb-title">JULE LEADERBOARD</span>
+            </h1>
+            <div class="header-sub" id="lb-sub">Persistent Interaction Points</div>
+        </header>
+
+        <div class="leaderboard-body">
+            <div class="table-header">
+                <span class="col-rank">RANK</span>
+                <span class="col-user">VIEWER</span>
+                <span class="col-level">LV</span>
+                <span class="col-points">POIN</span>
+            </div>
+
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="loading-state">Memuat klasemen poin...</div>
+            </div>
+        </div>
+
+        <footer class="leaderboard-footer">
+            <div class="footer-tip">Ketik <code>!poin</code> / <code>!rank</code> di live chat</div>
+            <div id="connection-status" class="status-connected">● Aktif</div>
+        </footer>
+    </div>
+</div>

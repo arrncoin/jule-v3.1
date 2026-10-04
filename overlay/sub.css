@@ -1,0 +1,610 @@
+/* ==========================================================================
+   STREAMER HUD OVERLAY - GAMING EDITION
+   Realtime Multiplatform Telemetry (YouTube & TikTok)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rajdhani:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=swap');
+
+:root {
+  --hud-bg-primary: rgba(10, 14, 22, 0.94);
+  --hud-bg-secondary: rgba(18, 24, 38, 0.85);
+  --hud-bg-tertiary: rgba(25, 34, 52, 0.7);
+  
+  --color-yt-red: #ff2a4d;
+  --color-yt-glow: rgba(255, 42, 77, 0.45);
+  --color-tt-cyan: #00f3ff;
+  --color-tt-pink: #fe2c55;
+  --color-tt-glow: rgba(0, 243, 255, 0.4);
+
+  --color-cyber-gold: #ffb800;
+  --color-cyber-green: #00ff88;
+  --color-text-main: #f0f4fc;
+  --color-text-dim: #7f8fa4;
+  --color-text-muted: #536275;
+  --color-border-hud: rgba(0, 243, 255, 0.22);
+  --color-border-glass: rgba(255, 255, 255, 0.08);
+
+  --font-hud-display: 'Rajdhani', sans-serif;
+  --font-hud-tech: 'Chakra Petch', sans-serif;
+  --font-hud-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: transparent;
+  padding: 16px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================
+   OUTER HUD WRAPPER & BRACKET CORNERS
+========================================= */
+
+.hud-wrapper {
+  position: relative;
+  display: inline-block;
+  padding: 4px;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.8));
+}
+
+/* Cyber Tactical Corner Brackets */
+.hud-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-corner.top-left {
+  top: 0;
+  left: 0;
+  border-top: 2px solid var(--color-tt-cyan);
+  border-left: 2px solid var(--color-tt-cyan);
+  box-shadow: -2px -2px 6px rgba(0, 243, 255, 0.6);
+}
+
+.hud-corner.top-right {
+  top: 0;
+  right: 0;
+  border-top: 2px solid var(--color-yt-red);
+  border-right: 2px solid var(--color-yt-red);
+  box-shadow: 2px -2px 6px rgba(255, 42, 77, 0.6);
+}
+
+.hud-corner.bottom-left {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid var(--color-tt-cyan);
+  border-left: 2px solid var(--color-tt-cyan);
+  box-shadow: -2px 2px 6px rgba(0, 243, 255, 0.6);
+}
+
+.hud-corner.bottom-right {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid var(--color-yt-red);
+  border-right: 2px solid var(--color-yt-red);
+  box-shadow: 2px 2px 6px rgba(255, 42, 77, 0.6);
+}
+
+/* =========================================
+   MAIN GAMING CARD
+========================================= */
+
+.sub-card {
+  position: relative;
+  width: 360px;
+  background: linear-gradient(145deg, rgba(14, 18, 28, 0.96) 0%, rgba(8, 10, 16, 0.98) 100%);
+  border: 1px solid var(--color-border-hud);
+  border-radius: 8px;
+  padding: 14px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+  box-shadow: inset 0 0 24px rgba(0, 243, 255, 0.04), 0 8px 32px rgba(0, 0, 0, 0.85);
+}
+
+/* Scanline / Cyber grid subtle texture */
+.sub-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-tt-cyan), transparent 30%, transparent 70%, var(--color-yt-red));
+  z-index: 5;
+}
+
+.sub-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* =========================================
+   TOP HUD STATUS BAR
+========================================= */
+
+.hud-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border-glass);
+}
+
+.hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-cyber-green);
+  box-shadow: 0 0 8px var(--color-cyber-green);
+  animation: cyberBlink 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes cyberBlink {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+.hud-brand-title {
+  font-family: var(--font-hud-tech);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+}
+
+.hud-badge-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 243, 255, 0.08);
+  border: 1px solid rgba(0, 243, 255, 0.25);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.sync-icon {
+  font-size: 0.65rem;
+  color: var(--color-tt-cyan);
+}
+
+.sync-text {
+  font-family: var(--font-hud-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--color-tt-cyan);
+}
+
+/* =========================================
+   SUB HEADER: BRAND + COUNT + STATS
+========================================= */
+
+.sub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sub-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.platform-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px var(--color-yt-glow));
+}
+
+.sub-label-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.sub-platform-name {
+  font-family: var(--font-hud-tech);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-yt-red);
+}
+
+.label {
+  font-family: var(--font-hud-tech);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+}
+
+.sub-count-wrapper {
+  margin-top: 2px;
+}
+
+.count {
+  font-family: var(--font-hud-display);
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  letter-spacing: 1px;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.25), 0 0 28px rgba(255, 42, 77, 0.3);
+}
+
+/* =========================================
+   CHANNEL TELEMETRY CHIPS (VIEWS & VIDEOS)
+========================================= */
+
+.channel-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 105px;
+}
+
+.cyber-stat-chip {
+  background: var(--hud-bg-secondary);
+  border: 1px solid var(--color-border-glass);
+  border-left: 2px solid var(--color-tt-cyan);
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+
+.cyber-stat-chip:last-child {
+  border-left-color: var(--color-cyber-gold);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-svg-icon {
+  width: 11px;
+  height: 11px;
+  stroke: var(--color-text-dim);
+}
+
+.stat-label {
+  font-family: var(--font-hud-tech);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stat-value {
+  font-family: var(--font-hud-mono);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* =========================================
+   GAMER XP PROGRESS BAR & GOAL
+========================================= */
+
+.sub-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(14, 18, 28, 0.6);
+  border: 1px solid var(--color-border-glass);
+  border-radius: 6px;
+}
+
+.progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.meta-icon {
+  width: 12px;
+  height: 12px;
+  stroke: var(--color-cyber-gold);
+}
+
+.meta-title {
+  font-family: var(--font-hud-tech);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-cyber-gold);
+  text-transform: uppercase;
+}
+
+.target-info {
+  font-family: var(--font-hud-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  text-align: right;
+}
+
+.progress-bar-bg {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background-color: rgba(16, 21, 33, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.progress-bar-fill {
+  position: relative;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(
+    90deg,
+    #cc0029 0%,
+    #ff2a4d 50%,
+    #ff5577 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(255, 42, 77, 0.65);
+}
+
+/* Animated leading edge energy gleam */
+.progress-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff, 0 0 16px var(--color-yt-red);
+  border-radius: 4px;
+}
+
+/* =========================================
+   DUAL LIVE MONITORS (YOUTUBE & TIKTOK PODS)
+========================================= */
+
+.live-viewers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.live-item {
+  position: relative;
+  background: var(--hud-bg-secondary);
+  border: 1px solid var(--color-border-glass);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.pod-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pod-platform {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pod-platform-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.pod-name {
+  font-family: var(--font-hud-tech);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--color-text-main);
+}
+
+.pod-tag {
+  font-family: var(--font-hud-mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.yt-tag {
+  background: rgba(255, 42, 77, 0.15);
+  color: var(--color-yt-red);
+  border: 1px solid rgba(255, 42, 77, 0.3);
+}
+
+.tt-tag {
+  background: rgba(0, 243, 255, 0.15);
+  color: var(--color-tt-cyan);
+  border: 1px solid rgba(0, 243, 255, 0.3);
+}
+
+.pod-body {
+  display: flex;
+  align-items: center;
+}
+
+.live-item .stat-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-hud-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-dim);
+  transition: all 0.3s ease;
+}
+
+/* Offline state dot */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+  display: inline-block;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+/* =========================================
+   LIVE BROADCAST ACTIVE STATES
+========================================= */
+
+/* YouTube Live Active */
+.live-item.is-live-yt {
+  background: linear-gradient(135deg, rgba(32, 16, 22, 0.9), rgba(18, 24, 38, 0.85));
+  border-color: rgba(255, 42, 77, 0.55);
+  box-shadow: 0 0 16px rgba(255, 42, 77, 0.25), inset 0 0 12px rgba(255, 42, 77, 0.1);
+}
+
+.live-item.is-live-yt .pod-name {
+  color: #ff758c;
+}
+
+.live-item.is-live-yt .stat-value {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 42, 77, 0.7);
+}
+
+.live-item.is-live-yt .live-dot {
+  background-color: var(--color-yt-red);
+  box-shadow: 0 0 10px var(--color-yt-red), 0 0 16px var(--color-yt-red);
+  animation: liveSignalPulse 1.2s ease-in-out infinite alternate;
+}
+
+.live-item.is-live-yt .yt-tag {
+  background: var(--color-yt-red);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 42, 77, 0.6);
+}
+
+/* TikTok Live Active */
+.live-item.is-live {
+  background: linear-gradient(135deg, rgba(12, 28, 36, 0.9), rgba(18, 24, 38, 0.85));
+  border-color: rgba(0, 243, 255, 0.55);
+  box-shadow: 0 0 16px rgba(0, 243, 255, 0.25), inset 0 0 12px rgba(0, 243, 255, 0.1);
+}
+
+.live-item.is-live .pod-name {
+  color: #70f7ff;
+}
+
+.live-item.is-live .stat-value {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+}
+
+.live-item.is-live .live-dot {
+  background-color: var(--color-tt-cyan);
+  box-shadow: 0 0 10px var(--color-tt-cyan), 0 0 16px var(--color-tt-cyan);
+  animation: liveSignalPulse 1.2s ease-in-out infinite alternate;
+}
+
+.live-item.is-live .tt-tag {
+  background: var(--color-tt-cyan);
+  color: #06111a;
+  box-shadow: 0 0 8px rgba(0, 243, 255, 0.6);
+}
+
+@keyframes liveSignalPulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.35); opacity: 1; }
+}
+
+/* =========================================
+   RESPONSIVE DESIGN FOR OBS BROWSER SOURCES
+========================================= */
+
+@media (max-width: 380px) {
+  body {
+    padding: 8px;
+  }
+
+  .sub-card {
+    width: 100%;
+    padding: 12px 14px;
+  }
+
+  .count {
+    font-size: 1.8rem;
+  }
+
+  .live-viewers {
+    grid-template-columns: 1fr;
+  }
+}

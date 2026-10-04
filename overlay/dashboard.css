@@ -1,0 +1,190 @@
+/* overlay/dashboard.css */
+/* Clean Transparent Broadcast HUD for OBS Studio */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600&display=swap');
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: transparent !important;
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  background: transparent !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   OBS HUD Container (Floats in stream canvas)
+   ========================================================================== */
+.obs-hud-container {
+  position: absolute;
+  bottom: 36px;
+  right: 36px;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none; /* Let clicks pass through on stream */
+  user-select: none;
+  z-index: 999;
+}
+
+.hud-companion-card {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  animation: hud-float-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes hud-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   Mascot Avatar with Breathing Effect
+   ========================================================================== */
+.companion-avatar-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-glow-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #06b6d4 100%);
+  animation: ring-rotate 4s linear infinite;
+  opacity: 0.85;
+  filter: blur(4px);
+}
+
+@keyframes ring-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.companion-avatar-img {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  animation: avatar-breathe 3s ease-in-out infinite alternate;
+  z-index: 2;
+}
+
+@keyframes avatar-breathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05) translateY(-3px); }
+}
+
+.companion-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #0a0717;
+  box-shadow: 0 0 10px #10b981;
+  z-index: 3;
+}
+
+/* ==========================================================================
+   Floating Speech Bubble & Caption
+   ========================================================================== */
+.companion-speech-bubble {
+  max-width: 380px;
+  background: rgba(14, 10, 28, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px 18px 4px 18px;
+  padding: 14px 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 20px rgba(139, 92, 246, 0.15);
+  color: #ffffff;
+  position: relative;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.companion-name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background: linear-gradient(135deg, #f472b6 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+
+.mode-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.25);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  text-transform: uppercase;
+}
+
+.soundwave-viz {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+}
+
+.eq-bar {
+  width: 3px;
+  background: #ec4899;
+  border-radius: 2px;
+  animation: eq-pulse 0.8s ease-in-out infinite alternate;
+}
+.eq-bar.bar-1 { height: 6px; animation-delay: 0.1s; }
+.eq-bar.bar-2 { height: 12px; animation-delay: 0.3s; }
+.eq-bar.bar-3 { height: 9px; animation-delay: 0.2s; }
+.eq-bar.bar-4 { height: 14px; animation-delay: 0.4s; }
+
+@keyframes eq-pulse {
+  0% { transform: scaleY(0.4); opacity: 0.6; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+.bubble-text {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #f1f5f9;
+  word-break: break-word;
+}

@@ -1,0 +1,28 @@
+node_modules/
+.env
+
+# Runtime / generated
+output/
+logs/
+*.log
+*.tmp
+*.cache
+
+# Database
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/jule.db.json
+
+# Runtime state
+memory.json
+state/*.json
+license.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

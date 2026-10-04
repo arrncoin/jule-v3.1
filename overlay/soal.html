@@ -1,0 +1,95 @@
+<!-- overlay/soal.html -->
+<div id="game-container" class="game-container">
+    <!-- Ambient Background Glows -->
+    <div class="bg-glow-orb orb-1"></div>
+    <div class="bg-glow-orb orb-2"></div>
+
+    <!-- Header Section -->
+    <header class="game-header">
+        <div class="header-brand">
+            <div class="game-icon-ring">
+                <div class="game-icon-core">🎯</div>
+            </div>
+            <div class="brand-details">
+                <div class="game-tag">
+                    <span class="live-dot"></span>
+                    <span>LIVE INTERACTIVE GAME</span>
+                </div>
+                <h1 class="game-title">KAK JULE <span class="game-highlight">TEBAK KATA</span></h1>
+            </div>
+        </div>
+
+        <div class="header-stats">
+            <div class="question-pill" id="question-pill">
+                <span class="pill-label">SOAL</span>
+                <span class="pill-value" id="q-no">#1</span>
+            </div>
+
+            <div class="timer-badge" id="timer-card">
+                <div class="timer-dial">
+                    <svg class="timer-svg" viewBox="0 0 44 44">
+                        <circle class="timer-bg" cx="22" cy="22" r="18"></circle>
+                        <circle class="timer-fill" id="timer-ring" cx="22" cy="22" r="18"></circle>
+                    </svg>
+                    <span class="timer-num" id="timer">20</span>
+                </div>
+                <span class="timer-unit">DETIK</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Clue / Pertanyaan Card -->
+    <section class="clue-section">
+        <div class="clue-card" id="clue-card">
+            <div class="clue-header">
+                <div class="clue-badge">
+                    <span class="clue-icon">💡</span>
+                    <span>PETUNJUK</span>
+                </div>
+                <span class="clue-sub">Tulis tebakan langsung di kolom chat</span>
+            </div>
+            <div class="clue-content" id="clue">Menunggu giliran soal...</div>
+        </div>
+    </section>
+
+    <!-- Word Guess Boxes -->
+    <section class="word-section">
+        <div class="word-card">
+            <div class="word-label">
+                <span>HURUF &amp; KATA</span>
+                <span class="word-hint" id="word-len-hint"></span>
+            </div>
+            <div class="word-tiles-container" id="word">
+                <span class="letter-tile masked">_</span>
+                <span class="letter-tile masked">_</span>
+                <span class="letter-tile masked">_</span>
+                <span class="letter-tile masked">_</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Answer Reveal Card (Tampil saat ronde selesai) -->
+    <section class="answer-section">
+        <div class="answer-card" id="answer-card">
+            <div class="answer-badge">
+                <span class="sparkle">✨</span>
+                <span>KUNCI JAWABAN BENAR</span>
+            </div>
+            <div class="answer-value" id="answer"></div>
+        </div>
+    </section>
+
+    <!-- Winners & Live Leaderboard Section -->
+    <section class="leaderboard-section">
+        <div class="leaderboard-header">
+            <div class="lb-title">
+                <span class="lb-icon">🏆</span>
+                <span id="lb-heading">TOP PENJAWAB TERCEPAT</span>
+            </div>
+            <span class="lb-note" id="lb-sub">Poin masuk ke profile</span>
+        </div>
+        <div class="leaderboard-list" id="leaderboard">
+            <!-- Dynamic winner/ranking rows -->
+        </div>
+    </section>
+</div>
